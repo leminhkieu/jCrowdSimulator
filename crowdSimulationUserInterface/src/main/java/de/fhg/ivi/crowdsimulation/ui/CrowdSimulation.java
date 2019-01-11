@@ -72,7 +72,7 @@ public class CrowdSimulation extends JFrame
     /**
      * Uses the object logger for printing specific messages in the console.
      */
-    private static final Logger  logger           = LoggerFactory
+    protected static final Logger  logger           = LoggerFactory
         .getLogger(MethodHandles.lookup().lookupClass());
 
     /**
@@ -327,7 +327,7 @@ public class CrowdSimulation extends JFrame
      * Loads the default data for {@link Boundary}s, {@link WayPoint}s and {@link Pedestrian}s
      * objects.
      */
-    private void loadInitialData()
+    protected void loadInitialData()
     {
         try
         {
