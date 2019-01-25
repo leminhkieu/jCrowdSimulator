@@ -6,3 +6,11 @@
 *.iml
 out
 gen
+
+# Mac crap
+.DS_Store
+
+# Vim swap files
+*.swp
+
+
