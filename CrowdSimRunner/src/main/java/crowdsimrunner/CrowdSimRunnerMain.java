@@ -26,8 +26,8 @@ import java.util.List;
  */
 public class CrowdSimRunnerMain extends CrowdSimulation {
 
-    int NumAgents = 100; // Number of agents to create when not reading data
-    int NumWaypoints = 5; // Number of waypoints
+    private static int NumAgents = 100; // Number of agents to create when not reading data
+    private static int NumWaypoints = 5; // Number of waypoints
 
     private static final GeometryFactory geomFac = new GeometryFactory();
 
@@ -90,17 +90,18 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
                     // Load pedestrians
                     // create a list of Geometry objects to represent the people
-                    List<Geometry> people = new ArrayList<Geometry>();
-                    for (int i = 0; i < NumAgents; i++) {
+                    List<Geometry> people = new ArrayList<>();
+                    for (int i = 0; i < CrowdSimRunnerMain.NumAgents; i++) {
                         people.add(geomFac.createPoint(new Coordinate(1.0+i, 1.0+i)));
                     }
+                    System.out.println(people);
 
                     // create crowd object
                     VisualCrowd crowd = super.crowdSimulator.createVisualCrowd(people, false, Color.BLUE);
 
                     // Load waypoints
-                    List<Geometry> waypoints = new ArrayList<Geometry>();
-                    for (int i = 0; i < NumWaypoints; i++) {
+                    List<Geometry> waypoints = new ArrayList<>();
+                    for (int i = 0; i < CrowdSimRunnerMain.NumWaypoints; i++) {
                         people.add(geomFac.createPoint(new Coordinate(5.0 + i*2, 5.0 + i*2)));
                     }
 
@@ -159,6 +160,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             //logger.debug("CrowdSimulation.loadInitialData(), ", e);
             System.err.println("Error: CrowdSimulation.loadInitialData()");
         } catch (NoSuchAuthorityCodeException e) {
+            System.err.println("Error: CrowdSimulation.loadInitialData()");
             e.printStackTrace();
         } catch (FactoryException e) {
             System.err.println("Error: CrowdSimulation.loadInitialData()");
@@ -166,5 +168,12 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         }
 
         System.out.println("...Finished loading data");
+
+        System.out.println("Have created "+super.crowdSimulator.getCrowds().size()+" crowds:");
+        for (VisualCrowd c : super.crowdSimulator.getCrowds()) {
+            System.out.println("\t"+c.toString());
+            System.out.println("\tNumPedestrians: "+c.getPedestrians());
+        }
+
     }
 }
