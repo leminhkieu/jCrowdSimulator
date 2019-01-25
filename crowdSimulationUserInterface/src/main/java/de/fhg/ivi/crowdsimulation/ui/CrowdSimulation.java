@@ -110,7 +110,7 @@ public class CrowdSimulation extends JFrame
      * This object represents the "Map" class, this means the part in which buildings, waypoints,
      * pedestrians and so on are drawn, and in which the simulation will be visible.
      */
-    private Map                  map;
+    protected Map                  map;
 
     /**
      * This object represents the {@link JPanel} for logging informations over the simulation.

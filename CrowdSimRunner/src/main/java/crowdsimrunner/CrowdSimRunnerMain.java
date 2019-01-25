@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import de.fhg.ivi.crowdsimulation.CrowdSimulatorNotValidException;
 import de.fhg.ivi.crowdsimulation.crowd.wayfindingmodel.route.Route;
+import de.fhg.ivi.crowdsimulation.geom.GeometryTools;
 import de.fhg.ivi.crowdsimulation.ui.CrowdSimulation;
 import de.fhg.ivi.crowdsimulation.ui.extension.VisualCrowd;
 import org.geotools.referencing.CRS;
@@ -84,13 +85,14 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     break;
                 case CUSTOM:
                     // Need a CRS
-                    CoordinateReferenceSystem crs = CRS.decode("EPSG:27700");
+                    //CoordinateReferenceSystem crs = CRS.decode("EPSG:27700");
+                    CoordinateReferenceSystem crs = CRS.parseWKT("PROJCS[\"OSGB 1936 / British National Grid\",GEOGCS[\"OSGB 1936\",DATUM[\"OSGB_1936\",SPHEROID[\"Airy 1830\",6377563.396,299.3249646,AUTHORITY[\"EPSG\",\"7001\"]],AUTHORITY[\"EPSG\",\"6277\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4277\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",49],PARAMETER[\"central_meridian\",-2],PARAMETER[\"scale_factor\",0.9996012717],PARAMETER[\"false_easting\",400000],PARAMETER[\"false_northing\",-100000],AUTHORITY[\"EPSG\",\"27700\"],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]");
 
                     // Load pedestrians
                     // create a list of Geometry objects to represent the people
                     List<Geometry> people = new ArrayList<Geometry>();
                     for (int i = 0; i < NumAgents; i++) {
-                        people.add(geomFac.createPoint(new Coordinate(1.0, 1.0)));
+                        people.add(geomFac.createPoint(new Coordinate(1.0+i, 1.0+i)));
                     }
 
                     // create crowd object
@@ -99,7 +101,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     // Load waypoints
                     List<Geometry> waypoints = new ArrayList<Geometry>();
                     for (int i = 0; i < NumWaypoints; i++) {
-                        people.add(geomFac.createPoint(new Coordinate(1.0 + i, 1.0 + i)));
+                        people.add(geomFac.createPoint(new Coordinate(5.0 + i*2, 5.0 + i*2)));
                     }
 
                     Route route = super.crowdSimulator.getRouteFactory()
@@ -123,8 +125,30 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     }
 
 
-                    // LOAD BOUNDARIES
+                    // LOAD BOUNDARIES. Just one big polygon for now
+                    List<Geometry> boundaries = new ArrayList<Geometry>();
+                    boundaries.add(geomFac.createPolygon(new Coordinate[]{
+                            new Coordinate(0,0),
+                            new Coordinate(50,0),
+                            new Coordinate(50,20),
+                            new Coordinate(0,30),
+                            new Coordinate(0,0)
+                    }));
+                    crowdSimulator.addBoundaries(boundaries, false);
 
+                    // set bounding box
+                    crowdSimulator.expandBoundingBox(GeometryTools.getEnvelope(boundaries));
+
+
+
+
+
+                    // paint
+                    if (map != null)
+                    {
+                        map.resetMapExtent();
+                        map.repaint();
+                    }
 
 
                     break;
