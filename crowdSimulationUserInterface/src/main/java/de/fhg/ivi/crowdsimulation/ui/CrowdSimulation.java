@@ -84,7 +84,7 @@ public class CrowdSimulation extends JFrame
      * Main simulation object that contains the lists of {@link Pedestrian} objects, boundaries and
      * waypoints and computes the actual simulation.
      */
-    private VisualCrowdSimulator crowdSimulator;
+    protected VisualCrowdSimulator crowdSimulator;
 
     /**
      * Threading for simulation purposes (for the pedestrian calculations).
