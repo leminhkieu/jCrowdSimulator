@@ -9,6 +9,7 @@ import de.fhg.ivi.crowdsimulation.crowd.wayfindingmodel.route.Route;
 import de.fhg.ivi.crowdsimulation.geom.GeometryTools;
 import de.fhg.ivi.crowdsimulation.ui.CrowdSimulation;
 import de.fhg.ivi.crowdsimulation.ui.extension.VisualCrowd;
+import de.fhg.ivi.crowdsimulation.ui.gui.control.actions.simulation.StartSimulation;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -16,6 +17,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +44,16 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
     public CrowdSimRunnerMain() {
         super();
-    }
 
+        /* ********* Add other controls here ********* */
+
+        // Start the simulation
+        System.out.print("Starting the simulation ... ");
+        StartSimulation starter = new StartSimulation(this);
+        // Any old ActionEvent can be fired to kick off the StarSimulation action:
+        starter.actionPerformed(new ActionEvent(this, 1, "none"));
+        System.out.println("... simulation started");
+    }
 
 
     public static void main(String[] args) {
@@ -58,8 +68,6 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                 e.printStackTrace();
             }
             CrowdSimRunnerMain csrm = new CrowdSimRunnerMain();
-            //@SuppressWarnings("unused")
-            //CrowdSimulation ps = new CrowdSimulation();
         }
     }
 
@@ -92,23 +100,21 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     // create a list of Geometry objects to represent the people
                     List<Geometry> people = new ArrayList<>();
                     for (int i = 0; i < CrowdSimRunnerMain.NumAgents; i++) {
-                        people.add(geomFac.createPoint(new Coordinate(1.0+i, 1.0+i)));
+                        people.add(geomFac.createPoint(new Coordinate(1.0, 1.0+(i*0.1))));
                     }
-                    System.out.println(people);
 
                     // create crowd object
                     VisualCrowd crowd = super.crowdSimulator.createVisualCrowd(people, false, Color.BLUE);
 
                     // Load waypoints
                     List<Geometry> waypoints = new ArrayList<>();
-                    for (int i = 0; i < CrowdSimRunnerMain.NumWaypoints; i++) {
-                        people.add(geomFac.createPoint(new Coordinate(5.0 + i*2, 5.0 + i*2)));
-                    }
+                    //for (int i = 0; i < CrowdSimRunnerMain.NumWaypoints; i++) {
+                    waypoints.add(geomFac.createPoint(new Coordinate(20.0, 10.0 )));
+                    waypoints.add(geomFac.createPoint(new Coordinate(50.0, 10.0 )));
+                    //}
 
-                    Route route = super.crowdSimulator.getRouteFactory()
-                            .createRouteFromGeometries(waypoints);
-                    crowd.setRoute(route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(),
-                            false);
+                    Route route = super.crowdSimulator.getRouteFactory().createRouteFromGeometries(waypoints);
+                    crowd.setRoute(route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(), false);
 
                     // set crs
                     super.crowdSimulator.setCrs(crs);
@@ -127,11 +133,11 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
 
                     // LOAD BOUNDARIES. Just one big polygon for now
-                    List<Geometry> boundaries = new ArrayList<Geometry>();
+                   /* List<Geometry> boundaries = new ArrayList<Geometry>();
                     boundaries.add(geomFac.createPolygon(new Coordinate[]{
                             new Coordinate(0,0),
-                            new Coordinate(50,0),
-                            new Coordinate(50,20),
+                            new Coordinate(60,0),
+                            new Coordinate(60,30),
                             new Coordinate(0,30),
                             new Coordinate(0,0)
                     }));
@@ -139,10 +145,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
                     // set bounding box
                     crowdSimulator.expandBoundingBox(GeometryTools.getEnvelope(boundaries));
-
-
-
-
+*/
 
                     // paint
                     if (map != null)
@@ -169,11 +172,11 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
         System.out.println("...Finished loading data");
 
-        System.out.println("Have created "+super.crowdSimulator.getCrowds().size()+" crowds:");
-        for (VisualCrowd c : super.crowdSimulator.getCrowds()) {
-            System.out.println("\t"+c.toString());
-            System.out.println("\tNumPedestrians: "+c.getPedestrians());
-        }
+        System.out.println("Have created "+super.crowdSimulator.getCrowds().size()+" crowd.");
+        //for (VisualCrowd c : super.crowdSimulator.getCrowds()) {
+        //    System.out.println("\t"+c.toString());
+        //    System.out.println("\tNumPedestrians: "+c.getPedestrians());
+        //}
 
     }
 }
