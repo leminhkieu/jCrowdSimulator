@@ -153,7 +153,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
                     // LOAD BOUNDARIES. One big corridor now
                     List<Geometry> boundaries = new ArrayList<>();
-                    /*boundaries.add(geomFac.createLineString(new Coordinate[]{ // Line along the bottom
+                    boundaries.add(geomFac.createLineString(new Coordinate[]{ // Line along the bottom
                             new Coordinate(0, 0),
                             new Coordinate(WIDTH, 0)
                     }));
@@ -161,17 +161,16 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                             new Coordinate(0, HEIGHT),
                             new Coordinate(WIDTH, HEIGHT)
                     })));
-                    boundaries.add(geomFac.((new Coordinate[]{ // Line along the left
-                            new Coordinate(0, 0),
-                            new Coordinate(0, HEIGHT)
-                    })));*/
-                    boundaries.add(geomFac.createPolygon(new Coordinate[] {
+
+                    // A rectangle
+                    /*boundaries.add(geomFac.createPolygon(new Coordinate[] {
                             new Coordinate(0, 0),
                             new Coordinate(WIDTH, 0),
                             new Coordinate(WIDTH, HEIGHT),
                             new Coordinate(0, HEIGHT),
                             new Coordinate(0, 0)
-                    }));
+                    }));*/
+
                     super.crowdSimulator.addBoundaries(boundaries, false);
 
                     // set bounding box
