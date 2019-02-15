@@ -42,7 +42,6 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     private static final GeometryFactory geomFac = new GeometryFactory();
 
 
-
     enum DATA {
         BERLIN,
         DRESDEN,
