@@ -1,4 +1,4 @@
-package crowdsimrunner;
+package de.fhg.ivi.crowdsimulation.crowd;
 
 import de.fhg.ivi.crowdsimulation.crowd.Pedestrian;
 import de.fhg.ivi.crowdsimulation.crowd.forcemodel.ForceModel;
