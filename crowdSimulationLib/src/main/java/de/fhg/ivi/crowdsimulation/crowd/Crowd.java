@@ -9,6 +9,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import crowdsimrunner.NewPedestrian;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
@@ -300,7 +301,7 @@ public class Crowd implements ICrowd, Identifiable
             float normalDesiredVelocity = 0;
             float maximumDesiredVelocity = 0;
 
-            Pedestrian pedestrian = new Pedestrian(pedestrianPosition.x, pedestrianPosition.y,
+            NewPedestrian pedestrian = new NewPedestrian(pedestrianPosition.x, pedestrianPosition.y,
                 normalDesiredVelocity, maximumDesiredVelocity, forceModel, numericIntegrator,
                 getQuadtree());
 

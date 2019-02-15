@@ -41,7 +41,6 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
     private static final GeometryFactory geomFac = new GeometryFactory();
 
-
     enum DATA {
         BERLIN,
         DRESDEN,
@@ -220,21 +219,6 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         List<Geometry> people = new ArrayList<>();
         // Create people spread evenly vertically within the corridor
         for (int i = 0; i < CrowdSimRunnerMain.NumAgents; i++) {
-            /*double y;
-            if (i==0) {
-                y = Double.MIN_VALUE; // avoid divide by 0
-            }
-            else if (i==CrowdSimRunnerMain.NumAgents-1) {
-                y = HEIGHT-Double.MIN_VALUE; // not quite on the upper corridor
-            }
-            else {
-                y = HEIGHT * ((float)i/(CrowdSimRunnerMain.NumAgents-1)); // Agents spread evenly vertically
-            }*/
-            // Somewhere randomly 1m between the upper and lower walls
-            // double y = (Math.random()*HEIGHT - 1) / (HEIGHT - 1);
-            // Spread evenly vertically 1m inside the upper and lower walls
-            //double y = ( ((double)(i+1.0)/CrowdSimRunnerMain.NumAgents)*HEIGHT - 1.0 ) / (HEIGHT - 1.0);
-
             // Complicated way to calculate agent position, scaling to within 1 m of the upper and lower boundaries
             // (from https://stackoverflow.com/questions/5294955/how-to-scale-down-a-range-of-numbers-with-a-known-min-and-max-value)
             double pos = ((i+1)/(double)CrowdSimRunnerMain.NumAgents); // (called 'x' on the website above)
