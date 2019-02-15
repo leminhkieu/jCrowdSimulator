@@ -7,17 +7,12 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import de.fhg.ivi.crowdsimulation.CrowdSimulator;
 import de.fhg.ivi.crowdsimulation.CrowdSimulatorNotValidException;
 import de.fhg.ivi.crowdsimulation.crowd.Crowd;
-import de.fhg.ivi.crowdsimulation.crowd.Group;
 import de.fhg.ivi.crowdsimulation.crowd.Pedestrian;
-import de.fhg.ivi.crowdsimulation.crowd.forcemodel.ForceModel;
-import de.fhg.ivi.crowdsimulation.crowd.forcemodel.numericintegration.NumericIntegrator;
 import de.fhg.ivi.crowdsimulation.crowd.wayfindingmodel.route.Route;
 import de.fhg.ivi.crowdsimulation.geom.GeometryTools;
-import de.fhg.ivi.crowdsimulation.geom.Quadtree;
 import de.fhg.ivi.crowdsimulation.ui.CrowdSimulation;
 import de.fhg.ivi.crowdsimulation.ui.extension.VisualCrowd;
 import de.fhg.ivi.crowdsimulation.ui.gui.control.actions.simulation.StartSimulation;
-import de.fhg.ivi.crowdsimulation.ui.gui.control.menus.view.ForceMenu;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -55,9 +50,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     private static final Set<NewPedestrian> allPedestrians = new HashSet<>();
 
     // And keep them all in the same crowd
-    //private static VisualCrowd mainCrowd;
-    private static Group mainGroup; // And they will be in the same group
-    private Quadtree quadtree = new Quadtree(); // Use the same quadtree for everything
+    private static VisualCrowd mainCrowd;
+
 
 
 
@@ -98,7 +92,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                 e.printStackTrace();
             }
             System.out.println("Adding more people to the simulation");
-            this.addPedestrians(1);
+            this.addPedestrians(1, CrowdSimRunnerMain.mainCrowd);
             //this.addPedestrians(CrowdSimRunnerMain.numIntervals, null);
         }
     }
@@ -158,19 +152,15 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     CrowdSimRunnerMain.route = super.crowdSimulator.getRouteFactory().createRouteFromGeometries(waypoints);
 
 
-                    // Create the crow and load initial pedestrians
-                    Crowd crowd = new Crowd(this.crowdSimulator.getForceModel(),this.crowdSimulator.getNumericIntegrator());
-                    crowd.setQuadtree(this.quadtree);
-
-                    VisualCrowd newCrowd = new VisualCrowd(crowd, Color.BLUE);
-                    this.addPedestrians(CrowdSimRunnerMain.NumInitialAgents);
+                    // Load initial pedestrians
+                    Crowd firstCrowd = this.addPedestrians(CrowdSimRunnerMain.NumInitialAgents, null);
 
                     // expand bounding box by crowd
-                    super.crowdSimulator.expandBoundingBox(newCrowd.getBoundingBox());
+                    super.crowdSimulator.expandBoundingBox(firstCrowd.getBoundingBox());
 
                     // expand bounding box by route of crowd
-                    if (newCrowd.getRoute() != null) {
-                        super.crowdSimulator.expandBoundingBox(newCrowd.getRoute().getBoundingBox());
+                    if (firstCrowd.getRoute() != null) {
+                        super.crowdSimulator.expandBoundingBox(firstCrowd.getRoute().getBoundingBox());
                     }
 
 
@@ -235,14 +225,16 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     /**
      * Add pedestrians to the simulation.
      * @param numPedestrians The number of pedestrians to create
+     * @param currentCrowd Optionally add the new pedestrians to this crowd. If this is null (e.g. the
+     *                     first time this is called) then a new crowd is created and added to the model.
      * @return The crowd that has been added (you don't need to actually do anything with the crowd,
      * it is added as a side effect).
      * @throws CrowdSimulatorNotValidException
      */
-    private void addPedestrians(int numPedestrians) throws CrowdSimulatorNotValidException {
+    private Crowd addPedestrians(int numPedestrians, Crowd currentCrowd) throws CrowdSimulatorNotValidException {
 
-        // Create a list of pedestrians to add
-        List<NewPedestrian> pedestrians = new ArrayList<>(numPedestrians);
+        // create a list of Geometry objects to represent the people
+        List<Geometry> peopleGeometries = new ArrayList<>();
 
         if (numPedestrians == 1) {
             // If only 1 pedestrian then just create randomly somewhere within the boundary
@@ -253,7 +245,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             double b = HEIGHT-1; // max value we want to scale to
             double y = ( ((b-a)*(pos-0)) / (1-0) ) + a;
             System.out.println(y);
-            pedestrians.add(createPedestrian(5.0, y) );
+            peopleGeometries.add(geomFac.createPoint(new Coordinate(5.0, y )));
         }
         else {
             // Create people spread evenly vertically within the corridor
@@ -281,34 +273,37 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                 double y = ( ((b-a)*(pos-0)) / (1-0) ) + a;
                 System.out.println(y);
 
-                pedestrians.add (createPedestrian(5.0, y) );
+                peopleGeometries.add(geomFac.createPoint(new Coordinate(5.0, y )));
             } // else pedestrians > 1
         }  // for numPedestrians
 
+        // XXXX HERE
+
+        // TODO: Create NewPedestrian objects from the geometries and use these to create the crowd.
+        // Can use or adapt code from CrowdFactory (not sure the best way to do this - could probably
+        // just copy and paste
+        // create new crowd
+        Crowd crowd = new Crowd(forceModel, numericIntegrator);
+        crowd.setQuadtree(quadtree);
+        crowd.setThreadPool(threadPool);
+        crowd.setPedestrians(pedestrians);
+        return crowd;
+
+
+
         // Keep links to all of the people.
-        CrowdSimRunnerMain.allPedestrians.addAll(pedestrians);
+        CrowdSimRunnerMain.allPedestrians.addAll(peopleGeometries)
 
+        // create crowd object
 
-        // Create a new crowd for the pedestrians
-        newCrowd
+        super.crowdSimcreateCrowdFromCoordinates(List<Coordinate> pedestrians, boolean ignoreInvalid)
 
-
-        // Set the route
+        // Do it using the factory
+        mainCrowd = super.crowdSimulator.createVisualCrowd(peopleGeometries, false, Color.BLUE);
         mainCrowd.setRoute(CrowdSimRunnerMain.route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(), false);
 
-
         // add crowd
-        super.crowdSimulator.addCrowd(visualCrowd, false);
-        return visualCrowd;
-    }
-
-    private NewPedestrian createPedestrian(double x, double y) {
-
-        // TODO Vary these velocities heterogeneously
-        float normalDesiredVelocity = 0;
-        float maximumDesiredVelocity = 0;
-
-        NewPedestrian pedestrian = new NewPedestrian(x, y, normalDesiredVelocity, maximumDesiredVelocity, this.crowdSimulator, this.quadtree);
-        return pedestrian;
+        super.crowdSimulator.addCrowd(mainCrowd, false);
+        return mainCrowd;
     }
 }

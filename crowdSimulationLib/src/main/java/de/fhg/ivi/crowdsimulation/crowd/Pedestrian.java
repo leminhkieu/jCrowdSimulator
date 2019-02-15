@@ -167,7 +167,7 @@ public class Pedestrian implements Clusterable, Cloneable, QuadtreeAccess, Ident
      *            {@link RungeKuttaIntegrator}
      * @param quadtree the quadtree object
      */
-    protected Pedestrian(double initialPositionX, double initialPositionY, float normalDesiredVelocity,
+    Pedestrian(double initialPositionX, double initialPositionY, float normalDesiredVelocity,
         float maximumDesiredVelocity, ForceModel forceModel, NumericIntegrator numericIntegrator,
         Quadtree quadtree)
     {

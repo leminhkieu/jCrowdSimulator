@@ -147,7 +147,7 @@ public class Crowd implements ICrowd, Identifiable
      *
      * @see CrowdFactory#createCrowdFromCoordinates(List, boolean)
      */
-    public Crowd(ForceModel forceModel, NumericIntegrator numericIntegrator)
+    Crowd(ForceModel forceModel, NumericIntegrator numericIntegrator)
     {
         this(0, forceModel, numericIntegrator, null);
     }
