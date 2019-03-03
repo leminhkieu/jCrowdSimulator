@@ -6,11 +6,17 @@ import de.fhg.ivi.crowdsimulation.crowd.forcemodel.ForceModel;
 import de.fhg.ivi.crowdsimulation.crowd.forcemodel.numericintegration.NumericIntegrator;
 import de.fhg.ivi.crowdsimulation.geom.Quadtree;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 public class NewPedestrian extends Pedestrian {
 
-    private static final int XLIM = 45; // the point at which pedestrians leave the simulation
+    private static final int XLIM = 95; // the point at which pedestrians leave the simulation
     // (should be part of CrowdSimRUnnerMain but caused a circular dependency)
+
+    public static BufferedWriter bw = null;
 
     // Useful to have a link back to the crowd simulator and crowd that this pedestrian belongs to
     private CrowdSimulator crowdSimulator;
@@ -24,6 +30,19 @@ public class NewPedestrian extends Pedestrian {
                 forceModel, numericIntegrator, quadtree);
         this.crowdSimulator = crowdSimulator;
         this.crowd = crowd;
+
+        // Initialise the file writer
+        if (NewPedestrian.bw == null) {
+            try {
+                NewPedestrian.bw = new BufferedWriter(new FileWriter(
+                        "./results/r"+System.currentTimeMillis()+".csv"));
+
+                bw.write("Time,Agent,Xpos,Ypos,Velocity,Xforce,Yforce\n"); // Any others
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
         //System.out.println("Creating new pedestrian: "+this.getId());
     }
 
@@ -38,12 +57,26 @@ public class NewPedestrian extends Pedestrian {
     public void move(long time, double simulationInterval) {
         super.move(time,simulationInterval);
 
+        // Add this pedestrian's data to the output file
+        try {
+            NewPedestrian.bw.write(String.format("%s,%s,%s,%s,%s,%s,%s\n",
+                    this.crowdSimulator.getSimulatedTimeSpan(),
+                    this.getId(),
+                    this.getCurrentPositionVector().getX(),
+                    this.getCurrentPositionVector().getY(),
+                    this.getCurrentVelocity(),
+                    this.getTotalForce().getX(),
+                    this.getTotalForce().getY()
+                    ));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
         // See if this agent needs to be removed. Remove them by removing their
         // group (they are the only member of their group) from the constituent crowd.
-        //System.out.println(this.getId()+"m "+this.getCurrentPositionVector());
         if (this.getCurrentPositionVector().getX() > XLIM) {
-            System.out.println("Agent "+this.getId()+" needs to exit");
-            System.out.println(this.crowd);
+            //System.out.println("Agent "+this.getId()+" needs to exit");
             Group groupToRemove = null;
             for (Group group : this.crowd.getGroups())
             {

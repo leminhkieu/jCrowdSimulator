@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import de.fhg.ivi.crowdsimulation.CrowdSimulatorNotValidException;
 import de.fhg.ivi.crowdsimulation.crowd.Crowd;
+import de.fhg.ivi.crowdsimulation.crowd.NewPedestrian;
 import de.fhg.ivi.crowdsimulation.crowd.wayfindingmodel.route.Route;
 import de.fhg.ivi.crowdsimulation.geom.GeometryTools;
 import de.fhg.ivi.crowdsimulation.ui.CrowdSimulation;
@@ -19,7 +20,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 
@@ -30,14 +33,13 @@ import java.util.List;
 public class CrowdSimRunnerMain extends CrowdSimulation {
 
     private static final int NumAgents = 10; // Number of agents to create each spawn time
-    private static final int createInterval = 1; // Interval between creating agents (in seconds)
-    private static final int numIntervals = 100; // Number of times to spawn new agents
+    private static final int createInterval = 2; // Interval between creating agents (in seconds)
+    private static final int numIntervals = 5000; // Number of times to spawn new agents
 
-    private static final int SPEED_UP_FACTOR = 10; // Speed up by x times
+    private static final int SPEED_UP_FACTOR = 10; // Speed up by x times (if 1 then run in real time)
 
-    private static final int WIDTH = 50;
+    private static final int WIDTH = 100;
     private static final int HEIGHT= 10;
-    public static final int XLIM = WIDTH -10 ; // The point at which agents leave the simulation
 
     private static Route route = null; // All agents will follw the same route
 
@@ -76,6 +78,9 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
         // Every 10 seconds, add more people, and do this 10 times
         for (int i = 0; i<CrowdSimRunnerMain.numIntervals ; i++) {
+            if (i % 100 == 0) {
+                System.out.println("Interval "+i+" / "+CrowdSimRunnerMain.numIntervals);
+            }
             try {
                 //System.out.print("\tSleeping for "+createInterval+" seconds...");
                 Thread.sleep(( createInterval* 1000 ) / SPEED_UP_FACTOR);
@@ -83,14 +88,14 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("Adding more people to the simulation");
+            //System.out.println("Adding more people to the simulation");
             this.addPedestrians();
         }
+
     }
 
 
     public static void main(String[] args) {
-        {
             System.out.println("Starting Crowd Sim Runner");
             // set system look and feel (adapts the look of java to the systems default look)
             try {
@@ -104,10 +109,12 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             CrowdSimRunnerMain csrm = new CrowdSimRunnerMain();
             try {
                 csrm.fireActions();
-            } catch (CrowdSimulatorNotValidException e) {
+                NewPedestrian.bw.close();
+            } catch (CrowdSimulatorNotValidException | IOException e) {
                 e.printStackTrace();
             }
-        }
+        System.out.println("Finished Simulation");
+
     }
 
     @Override
@@ -217,9 +224,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
      * Add pedestrians to the simulation.
      * @return The crowd that has been added (you don't need to actually do anything with the crowd,
      * it is added as a side effect).
-     * @throws CrowdSimulatorNotValidException
      */
-    private Crowd addPedestrians() throws CrowdSimulatorNotValidException {
+    private Crowd addPedestrians()  {
 
         // create a list of Geometry objects to represent the people
         List<Geometry> people = new ArrayList<>();
@@ -237,12 +243,19 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         }
 
         // create crowd object
-        VisualCrowd crowd = super.crowdSimulator.createVisualCrowd(people, false, Color.BLUE);
-        crowd.setRoute(CrowdSimRunnerMain.route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(), false);
-
-
-        // add crowd
-        super.crowdSimulator.addCrowd(crowd, false);
+        VisualCrowd crowd = null;
+        while(crowd == null) { // Might need to try a couple of times to add agents if the new ones are in the same positon as existing ones
+            try {
+                crowd = super.crowdSimulator.createVisualCrowd(people, false, Color.BLUE);
+                crowd.setRoute(CrowdSimRunnerMain.route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(), false);
+                // add crowd
+                super.crowdSimulator.addCrowd(crowd, false);
+            } catch (CrowdSimulatorNotValidException | ConcurrentModificationException e) {
+                System.err.println("CrowdSimRunnerMain.addPedestrians caught an exception, continuing anyway");
+                System.err.println(e.getMessage());
+                e.printStackTrace();
+            }
+        }
         return crowd;
     }
 }
