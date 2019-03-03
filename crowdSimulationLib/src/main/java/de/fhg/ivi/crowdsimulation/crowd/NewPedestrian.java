@@ -1,5 +1,6 @@
 package de.fhg.ivi.crowdsimulation.crowd;
 
+import de.fhg.ivi.crowdsimulation.CrowdSimulator;
 import de.fhg.ivi.crowdsimulation.crowd.Pedestrian;
 import de.fhg.ivi.crowdsimulation.crowd.forcemodel.ForceModel;
 import de.fhg.ivi.crowdsimulation.crowd.forcemodel.numericintegration.NumericIntegrator;
@@ -11,12 +12,18 @@ public class NewPedestrian extends Pedestrian {
     private static final int XLIM = 40; // the point at which pedestrians leave the simulation
     // (should be part of CrowdSimRUnnerMain but caused a circular dependency)
 
+    // Useful to have a link back to the crowd simulator and crowd that this pedestrian belongs to
+    private CrowdSimulator crowdSimulator;
+    private Crowd crowd;
+
     public NewPedestrian(double initialPositionX, double initialPositionY, float normalDesiredVelocity,
-                         float maximumDesiredVelocity, ForceModel forceModel, NumericIntegrator numericIntegrator,
-                         Quadtree quadtree)
+                         float maximumDesiredVelocity, ForceModel forceModel, NumericIntegrator numericIntegrator, Quadtree quadtree,
+                         CrowdSimulator crowdSimulator, Crowd crowd)
     {
         super(0, initialPositionX, initialPositionY, normalDesiredVelocity, maximumDesiredVelocity,
                 forceModel, numericIntegrator, quadtree);
+        this.crowdSimulator = crowdSimulator;
+        this.crowd = crowd;
         //System.out.println("Creating new pedestrian: "+this.getId());
     }
 

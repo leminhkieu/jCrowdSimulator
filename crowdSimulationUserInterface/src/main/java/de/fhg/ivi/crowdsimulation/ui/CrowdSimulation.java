@@ -463,8 +463,7 @@ public class CrowdSimulation extends JFrame
                 .getCRSFromFile(pedestriansFile);
 
             // create crowd object
-            VisualCrowd crowd = crowdSimulator.createVisualCrowd(pedestrians, ignoreInvalid,
-                crowdColor);
+            VisualCrowd crowd = crowdSimulator.createVisualCrowd(pedestrians, ignoreInvalid, crowdColor);
 
             // waypoint geometries
             List<Geometry> wayPointGeometries = DataTools.loadGeometriesFromFile(routeFile);

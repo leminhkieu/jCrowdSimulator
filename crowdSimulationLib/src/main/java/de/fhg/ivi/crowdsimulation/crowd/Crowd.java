@@ -9,6 +9,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.fhg.ivi.crowdsimulation.CrowdSimulator;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
@@ -58,6 +59,10 @@ import de.fhg.ivi.crowdsimulation.validate.ValidationTools;
  */
 public class Crowd implements ICrowd, Identifiable
 {
+
+    // Useful to have a link back to the crowd simulator that created this crowd
+    private CrowdSimulator crowdSimulator;
+
     /**
      * Uses the object logger for printing specific messages in the console.
      */
@@ -136,7 +141,7 @@ public class Crowd implements ICrowd, Identifiable
      * Creates a new {@link Crowd} object.
      * <p>
      * Users are requested to create {@link Crowd} objects using
-     * {@link CrowdFactory#createCrowdFromCoordinates(List, boolean)} method.
+     * {@link CrowdFactory#createCrowdFromCoordinates(List, boolean, CrowdSimulator)} method.
      * <p>
      *
      * @param forceModel the {@link ForceModel} objects, which represents the pedestrian modeling
@@ -145,18 +150,19 @@ public class Crowd implements ICrowd, Identifiable
      *            {@link SimpleEulerIntegrator}, Semi Implicit Euler
      *            {@link SemiImplicitEulerIntegrator} or Runge Kutta {@link RungeKuttaIntegrator}
      *
-     * @see CrowdFactory#createCrowdFromCoordinates(List, boolean)
+     * @see CrowdFactory#createCrowdFromCoordinates(List, boolean, CrowdSimulator)
      */
-    Crowd(ForceModel forceModel, NumericIntegrator numericIntegrator)
+    Crowd(ForceModel forceModel, NumericIntegrator numericIntegrator, CrowdSimulator crowdSimulator)
     {
         this(0, forceModel, numericIntegrator, null);
+        this.crowdSimulator = crowdSimulator;
     }
 
     /**
      * Creates a new {@link Crowd} object.
      * <p>
      * Users are requested to create {@link Crowd} objects using
-     * {@link CrowdFactory#createCrowdFromCoordinates(List, boolean)} method.
+     * {@link CrowdFactory#createCrowdFromCoordinates(List, boolean, CrowdSimulator)} method.
      * <p>
      *
      * @param id the id of this {@link Crowd}
@@ -301,8 +307,8 @@ public class Crowd implements ICrowd, Identifiable
             float maximumDesiredVelocity = 0;
 
             NewPedestrian pedestrian = new NewPedestrian(pedestrianPosition.x, pedestrianPosition.y,
-                normalDesiredVelocity, maximumDesiredVelocity, forceModel, numericIntegrator,
-                getQuadtree());
+                normalDesiredVelocity, maximumDesiredVelocity, forceModel, numericIntegrator, getQuadtree(),
+                    this.crowdSimulator, this);
 
             Group group = new Group();
             group.add(pedestrian);

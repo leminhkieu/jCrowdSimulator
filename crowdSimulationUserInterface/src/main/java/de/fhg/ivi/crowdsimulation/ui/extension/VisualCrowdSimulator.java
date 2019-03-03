@@ -49,10 +49,9 @@ public class VisualCrowdSimulator extends CrowdSimulator<VisualCrowd>
      * @throws CrowdSimulatorNotValidException
      * @return the created Crowd object
      */
-    public VisualCrowd createVisualCrowd(List<Geometry> pedestrians, boolean ignoreInvalid,
-        Color color) throws CrowdSimulatorNotValidException
+    public VisualCrowd createVisualCrowd(List<Geometry> pedestrians, boolean ignoreInvalid,  Color color) throws CrowdSimulatorNotValidException
     {
-        Crowd crowd = getCrowdFactory().createCrowdFromGeometries(pedestrians, ignoreInvalid);
+        Crowd crowd = getCrowdFactory().createCrowdFromGeometries(pedestrians, ignoreInvalid, this);
         return new VisualCrowd(crowd, color);
     }
 }

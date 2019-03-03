@@ -100,11 +100,11 @@ public class CrowdFactory
      * @throws CrowdSimulatorNotValidException in case 2 or more {@link Pedestrian} objects of the
      *             created {@link Crowd} object have identical positions.
      */
-    private Crowd createCrowd(List<Coordinate> pedestrians, boolean ignoreInvalid)
+    private Crowd createCrowd(List<Coordinate> pedestrians, boolean ignoreInvalid, CrowdSimulator crowdSimulator)
         throws CrowdSimulatorNotValidException
     {
         // create new crowd
-        Crowd crowd = new Crowd(forceModel, numericIntegrator);
+        Crowd crowd = new Crowd(forceModel, numericIntegrator, crowdSimulator);
         crowd.setQuadtree(quadtree);
         crowd.setThreadPool(threadPool);
         crowd.setPedestrians(pedestrians);
@@ -128,7 +128,7 @@ public class CrowdFactory
      * @throws CrowdSimulatorNotValidException
      * @return the created Crowd object
      */
-    public Crowd createCrowdFromGeometries(List<Geometry> pedestrians, boolean ignoreInvalid)
+    public Crowd createCrowdFromGeometries(List<Geometry> pedestrians, boolean ignoreInvalid, CrowdSimulator crowdSimulator)
         throws CrowdSimulatorNotValidException
     {
         List<Coordinate> pedestrianCoordinates = new ArrayList<>();
@@ -136,7 +136,7 @@ public class CrowdFactory
         {
             pedestrianCoordinates.add(pedestrian.getCoordinate());
         }
-        return createCrowdFromCoordinates(pedestrianCoordinates, ignoreInvalid);
+        return createCrowdFromCoordinates(pedestrianCoordinates, ignoreInvalid, crowdSimulator);
     }
 
     /**
@@ -158,10 +158,10 @@ public class CrowdFactory
      * @throws CrowdSimulatorNotValidException
      * @return the created Crowd object
      */
-    public Crowd createCrowdFromCoordinates(List<Coordinate> pedestrians, boolean ignoreInvalid)
+    public Crowd createCrowdFromCoordinates(List<Coordinate> pedestrians, boolean ignoreInvalid, CrowdSimulator crowdSimulator)
         throws CrowdSimulatorNotValidException
     {
-        return createCrowd(pedestrians, ignoreInvalid);
+        return createCrowd(pedestrians, ignoreInvalid, crowdSimulator);
     }
 
     /**
