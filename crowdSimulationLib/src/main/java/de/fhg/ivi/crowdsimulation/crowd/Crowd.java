@@ -60,6 +60,10 @@ import de.fhg.ivi.crowdsimulation.validate.ValidationTools;
 public class Crowd implements ICrowd, Identifiable
 {
 
+    public List<Group> getGroups() {
+        return this.groups;
+    }
+
     // Useful to have a link back to the crowd simulator that created this crowd
     private CrowdSimulator crowdSimulator;
 

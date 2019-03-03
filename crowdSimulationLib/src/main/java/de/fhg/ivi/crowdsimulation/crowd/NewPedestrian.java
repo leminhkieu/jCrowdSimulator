@@ -9,7 +9,7 @@ import de.fhg.ivi.crowdsimulation.geom.Quadtree;
 
 public class NewPedestrian extends Pedestrian {
 
-    private static final int XLIM = 40; // the point at which pedestrians leave the simulation
+    private static final int XLIM = 45; // the point at which pedestrians leave the simulation
     // (should be part of CrowdSimRUnnerMain but caused a circular dependency)
 
     // Useful to have a link back to the crowd simulator and crowd that this pedestrian belongs to
@@ -37,10 +37,25 @@ public class NewPedestrian extends Pedestrian {
     @Override
     public void move(long time, double simulationInterval) {
         super.move(time,simulationInterval);
+
+        // See if this agent needs to be removed. Remove them by removing their
+        // group (they are the only member of their group) from the constituent crowd.
         //System.out.println(this.getId()+"m "+this.getCurrentPositionVector());
         if (this.getCurrentPositionVector().getX() > XLIM) {
             System.out.println("Agent "+this.getId()+" needs to exit");
-
+            System.out.println(this.crowd);
+            Group groupToRemove = null;
+            for (Group group : this.crowd.getGroups())
+            {
+                if (group.getPedestrians(false).contains(this)) {
+                    groupToRemove = group;
+                    break;
+                }
+            }
+            if (groupToRemove==null) {
+                System.err.println("ERROR");
+            }
+            this.crowd.getGroups().remove(groupToRemove);
         }
     }
 }
