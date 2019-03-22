@@ -1,5 +1,6 @@
 package de.fhg.ivi.crowdsimulation.crowd;
 
+import com.vividsolutions.jts.math.Vector2D;
 import de.fhg.ivi.crowdsimulation.CrowdSimulator;
 import de.fhg.ivi.crowdsimulation.crowd.Pedestrian;
 import de.fhg.ivi.crowdsimulation.crowd.forcemodel.ForceModel;
@@ -12,6 +13,10 @@ import java.io.IOException;
 
 
 public class NewPedestrian extends Pedestrian {
+
+    // We need to when the first agent reaches the end of the corridor so that CrowdSimRunnerMain
+    // can stop creating agents
+    public static boolean reachedEndOfCorridor = false;
 
     private static final int XLIM = 95; // the point at which pedestrians leave the simulation
     // (should be part of CrowdSimRUnnerMain but caused a circular dependency)
@@ -73,6 +78,13 @@ public class NewPedestrian extends Pedestrian {
             System.exit(1);
         }
 
+        // See if the agent has reached the end of the corridor; if so then move them back to the beginning
+        if (this.getCurrentPositionVector().getX() > XLIM) {
+            this.setCurrentPositionVector(new Vector2D(0, this.getCurrentPositionCoordinate().y));
+            NewPedestrian.reachedEndOfCorridor = true;
+        }
+
+        /*
         // See if this agent needs to be removed. Remove them by removing their
         // group (they are the only member of their group) from the constituent crowd.
         if (this.getCurrentPositionVector().getX() > XLIM) {
@@ -90,5 +102,6 @@ public class NewPedestrian extends Pedestrian {
             }
             this.crowd.getGroups().remove(groupToRemove);
         }
+        */
     }
 }

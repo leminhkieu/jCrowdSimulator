@@ -32,11 +32,20 @@ import java.util.List;
  */
 public class CrowdSimRunnerMain extends CrowdSimulation {
 
-    private static final int NumAgents = 10; // Number of agents to create each spawn time
-    private static final int createInterval = 2; // Interval between creating agents (in seconds)
-    private static final int numIntervals = 5000; // Number of times to spawn new agents
+    // What the current status of the model is
+    public enum STATUS {
+        INIT, // Initialising, need to continue to create agents every N seconds
+        RUNNING, // The model is running, don't create any more agents
+        FINISHING;
+    }
+    public static STATUS status = STATUS.INIT; // Model starts in initialisation mode
 
-    private static final int SPEED_UP_FACTOR = 10; // Speed up by x times (if 1 then run in real time)
+    private static final int NumAgents = 10; // Number of agents to create each spawn time
+    private static final int createInterval = 1; // Interval between creating agents (in seconds)
+    private static final long runTime = 1000; // Run time, in seconds
+    //private static final int numIntervals = 5000; // Number of times to spawn new agents
+
+    private static final int SPEED_UP_FACTOR = 1; // Speed up by x times (if 1 then run in real time)
 
     private static final int WIDTH = 100;
     private static final int HEIGHT= 10;
@@ -67,6 +76,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
         // Start the simulation
         System.out.print("Starting the simulation ... ");
+        System.out.println("Status: "+CrowdSimRunnerMain.status);
         StartSimulation starter = new StartSimulation(this);
         // Any old ActionEvent can be fired to kick off the StarSimulation action:
         starter.actionPerformed(new ActionEvent(this, 1, "none"));
@@ -76,11 +86,14 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
         System.out.println("... simulation started");
 
+
+        // Create agents while in initialise mode (i.e. until the first agent has made it to the other side of the corridor
+        while (CrowdSimRunnerMain.status== STATUS.INIT) {
         // Every 10 seconds, add more people, and do this 10 times
-        for (int i = 0; i<CrowdSimRunnerMain.numIntervals ; i++) {
-            if (i % 100 == 0) {
-                System.out.println("Interval "+i+" / "+CrowdSimRunnerMain.numIntervals);
-            }
+        //for (int i = 0; i<CrowdSimRunnerMain.numIntervals ; i++) {
+        //    if (i % 100 == 0) {
+        //        System.out.println("Interval "+i+" / "+CrowdSimRunnerMain.numIntervals);
+        //    }
             try {
                 //System.out.print("\tSleeping for "+createInterval+" seconds...");
                 Thread.sleep(( createInterval* 1000 ) / SPEED_UP_FACTOR);
@@ -90,9 +103,29 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             }
             //System.out.println("Adding more people to the simulation");
             this.addPedestrians();
+
+            // See if any pedestrians have reached the end of the corridor (i.e. initialisation has finished)
+            if (NewPedestrian.reachedEndOfCorridor) {
+                CrowdSimRunnerMain.status = STATUS.RUNNING;
+                System.out.println("Status: "+CrowdSimRunnerMain.status);
+            }
         }
 
-    }
+        // All agents have been added, now just keep running until the model should finish
+        while (CrowdSimRunnerMain.status== STATUS.RUNNING) {
+            try {
+                Thread.sleep(( 1000 ) / SPEED_UP_FACTOR); // Check every second
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if ( (this.crowdSimulator.getSimulatedTimeSpan()/100) > runTime) {
+                CrowdSimRunnerMain.status = STATUS.FINISHING;
+                System.out.println("Status: "+CrowdSimRunnerMain.status);
+            }
+
+        }
+
+    } // fireActions
 
 
     public static void main(String[] args) {
