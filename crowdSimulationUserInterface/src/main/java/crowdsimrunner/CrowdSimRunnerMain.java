@@ -43,12 +43,12 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     }
     public static STATUS status = STATUS.INIT; // Model starts in initialisation mode
 
-    private static final int NumAgents = 10; // Number of agents to create each spawn time
+    private static final int NumAgents = 6; // Number of agents to create each spawn time
     private static final int createInterval = 1; // Interval between creating agents (in seconds)
     private static final long runTime = 1000; // Run time, in seconds
     //private static final int numIntervals = 5000; // Number of times to spawn new agents
 
-    private static final int SPEED_UP_FACTOR = 3; // Speed up by x times (if 1 then run in real time)
+    private static final int SPEED_UP_FACTOR = 10; // Speed up by x times (if 1 then run in real time)
 
     // Write out aggregate info (like the the mean velocity) every second
     private static BufferedWriter aggregateWriter = null;
@@ -94,6 +94,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         try {
             CrowdSimRunnerMain.aggregateWriter = new BufferedWriter(new FileWriter(
                     "./results/r-aggregate-" + System.currentTimeMillis() + ".csv"));
+            System.out.println("Opened aggregate file write: "+CrowdSimRunnerMain.aggregateWriter.toString());
 
             CrowdSimRunnerMain.aggregateWriter.write("Time,MeanVelocity,MeanForce\n"); // An
         } catch (IOException e) {
@@ -138,29 +139,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                 CrowdSimRunnerMain.status = STATUS.FINISHING;
                 System.out.println("Status: "+CrowdSimRunnerMain.status);
             }
-            // Write the mean information
-            double totalVelocity = 0.0;
-            double totalForce = 0.0;
-            int numAgents = 0;
-            for (Crowd c:crowdSimulator.getCrowds()) {
-               for (Pedestrian p: c.getPedestrians()) {
-                   totalVelocity += p.getCurrentVelocity();
-                   totalForce += p.getTotalForce().lengthSquared(); // Length squared avoids sqare root calculation
-                   numAgents++;
-               }
-            }
-
-            try {
-                CrowdSimRunnerMain.aggregateWriter.write(String.format("%s,%.2f,%.2f\n",
-                        this.crowdSimulator.getSimulatedTimeSpan(),
-                        totalVelocity/(double)numAgents,
-                        totalForce/(double)numAgents
-                ));
-            } catch (IOException e) {
-                System.err.println("Error writing aggreate info: "+e.getMessage()
-                );
-                e.printStackTrace();
-            }
+            this.writeAggregate(); // Write the aggregate information
 
 
         }
@@ -330,5 +309,32 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             }
         }
         return crowd;
+    }
+
+    private void writeAggregate() {
+        // Write the mean information
+        double totalVelocity = 0.0;
+        double totalForce = 0.0;
+        int numAgents = 0;
+        for (Crowd c:this.crowdSimulator.getCrowds()) {
+            for (Pedestrian p: c.getPedestrians()) {
+                totalVelocity += p.getCurrentVelocity();
+                totalForce += p.getTotalForce().lengthSquared(); // Length squared avoids sqare root calculation
+                numAgents++;
+            }
+        }
+
+        try {
+            CrowdSimRunnerMain.aggregateWriter.write(String.format("%s,%.4f,%.4f\n",
+                    this.crowdSimulator.getSimulatedTimeSpan(),
+                    totalVelocity/(double)numAgents,
+                    totalForce/(double)numAgents
+            ));
+            CrowdSimRunnerMain.aggregateWriter.flush();
+        } catch (IOException e) {
+            System.err.println("Error writing aggreate info: "+e.getMessage());
+            e.printStackTrace();
+        }
+
     }
 }
