@@ -40,7 +40,7 @@ public class NewPedestrian extends Pedestrian {
         if (NewPedestrian.bw == null) {
             try {
                 NewPedestrian.bw = new BufferedWriter(new FileWriter(
-                        "./results/r"+System.currentTimeMillis()+".csv"));
+                        "./results/r-individual-"+System.currentTimeMillis()+".csv"));
 
                 bw.write("Time,Agent,Xpos,Ypos,Velocity,Xforce,Yforce\n"); // Any others
             } catch (IOException e) {
