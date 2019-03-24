@@ -64,7 +64,7 @@ public class NewPedestrian extends Pedestrian {
 
         // Add this pedestrian's data to the output file
         try {
-            NewPedestrian.bw.write(String.format("%s,%s,%s,%s,%s,%s,%s\n",
+            NewPedestrian.bw.write(String.format("%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f\n",
                     this.crowdSimulator.getSimulatedTimeSpan(),
                     this.getId(),
                     this.getCurrentPositionVector().getX(),
