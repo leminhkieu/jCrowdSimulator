@@ -43,9 +43,9 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     }
     public static STATUS status = STATUS.INIT; // Model starts in initialisation mode
 
-    private static final int NumAgents = 6; // Number of agents to create each spawn time
+    private static final int NumAgents = 7; // Number of agents to create each spawn time
     private static final int createInterval = 1; // Interval between creating agents (in seconds)
-    private static final long runTime = 1000; // Run time, in seconds
+    private static final long runTime = 2000; // Run time, in seconds
     //private static final int numIntervals = 5000; // Number of times to spawn new agents
 
     private static final int SPEED_UP_FACTOR = 10; // Speed up by x times (if 1 then run in real time)
@@ -137,6 +137,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             }
             if ( (this.crowdSimulator.getSimulatedTimeSpan()/100) > runTime) {
                 CrowdSimRunnerMain.status = STATUS.FINISHING;
+                System.out.println("Run time "+runTime+" reached; finished simulation");
                 System.out.println("Status: "+CrowdSimRunnerMain.status);
             }
             this.writeAggregate(); // Write the aggregate information
@@ -165,8 +166,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             } catch (CrowdSimulatorNotValidException | IOException e) {
                 e.printStackTrace();
             }
+            
         System.out.println("Finished Simulation");
-
     }
 
     @Override
@@ -319,10 +320,15 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         for (Crowd c:this.crowdSimulator.getCrowds()) {
             for (Pedestrian p: c.getPedestrians()) {
                 totalVelocity += p.getCurrentVelocity();
-                totalForce += p.getTotalForce().lengthSquared(); // Length squared avoids sqare root calculation
+                try {
+                    totalForce += p.getTotalForce().lengthSquared(); // Length squared avoids sqare root calculation
+                }
+                catch (NullPointerException e) {
+                    System.err.println("Unable to calcuate force fo this agent, ignoring it.");
+                }
                 numAgents++;
-            }
-        }
+            } // for pedestrians
+        } // for crowds
 
         try {
             CrowdSimRunnerMain.aggregateWriter.write(String.format("%s,%.4f,%.4f\n",
