@@ -27,6 +27,9 @@ public class NewPedestrian extends Pedestrian {
     private CrowdSimulator crowdSimulator;
     private Crowd crowd;
 
+
+    private int numTimesThroughCorridor = 0;
+
     public NewPedestrian(double initialPositionX, double initialPositionY, float normalDesiredVelocity,
                          float maximumDesiredVelocity, ForceModel forceModel, NumericIntegrator numericIntegrator, Quadtree quadtree,
                          CrowdSimulator crowdSimulator, Crowd crowd)
@@ -42,7 +45,7 @@ public class NewPedestrian extends Pedestrian {
                 NewPedestrian.bw = new BufferedWriter(new FileWriter(
                         "./results/r-individual-"+System.currentTimeMillis()+".csv"));
 
-                bw.write("Time,Agent,Xpos,Ypos,Velocity,Xforce,Yforce\n"); // Any others
+                bw.write("Time,Agent,Xpos,Ypos,Velocity,Xforce,Yforce,NumTimesThroughCorridor\n"); // Any others
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -64,14 +67,15 @@ public class NewPedestrian extends Pedestrian {
 
         // Add this pedestrian's data to the output file
         try {
-            NewPedestrian.bw.write(String.format("%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f\n",
+            NewPedestrian.bw.write(String.format("%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%d\n",
                     this.crowdSimulator.getSimulatedTimeSpan(),
                     this.getId(),
                     this.getCurrentPositionVector().getX(),
                     this.getCurrentPositionVector().getY(),
                     this.getCurrentVelocity(),
                     this.getTotalForce().getX(),
-                    this.getTotalForce().getY()
+                    this.getTotalForce().getY(),
+                    this.numTimesThroughCorridor
                     ));
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,6 +86,7 @@ public class NewPedestrian extends Pedestrian {
         if (this.getCurrentPositionVector().getX() > XLIM) {
             this.setCurrentPositionVector(new Vector2D(0, this.getCurrentPositionCoordinate().y));
             NewPedestrian.reachedEndOfCorridor = true;
+            this.numTimesThroughCorridor += 1;
         }
 
         /*
