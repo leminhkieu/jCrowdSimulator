@@ -18,7 +18,8 @@ public class NewPedestrian extends Pedestrian {
     // can stop creating agents
     public static boolean reachedEndOfCorridor = false;
 
-    private static final int XLIM = 95; // the point at which pedestrians leave the simulation
+    private static final double XLIM = 95; // the point at which pedestrians leave the simulation
+    private static final int HEIGHT = 10;
     // (should be part of CrowdSimRUnnerMain but caused a circular dependency)
 
     public static BufferedWriter bw = null;
@@ -26,7 +27,6 @@ public class NewPedestrian extends Pedestrian {
     // Useful to have a link back to the crowd simulator and crowd that this pedestrian belongs to
     private CrowdSimulator crowdSimulator;
     private Crowd crowd;
-
 
     private int numTimesThroughCorridor = 0;
 
@@ -84,15 +84,21 @@ public class NewPedestrian extends Pedestrian {
 
         // See if the agent has reached the end of the corridor; if so then move them back to the beginning
         if (this.getCurrentPositionVector().getX() > XLIM) {
-            this.setCurrentPositionVector(new Vector2D(0, this.getCurrentPositionCoordinate().y));
+            //this.setCurrentPositionVector(new Vector2D(0, this.getCurrentPositionCoordinate().y));
+            double a = 2; // min value we want to scale to
+            double b = HEIGHT-2; // max value we want to scale to
+            //double y =  (b-a) * pos + a;
+            double y = (b-a) * Math.random() +a;
+            //double x = 5 * Math.random()+1;
+            this.setCurrentPositionVector(new Vector2D(5.0, y));
             NewPedestrian.reachedEndOfCorridor = true;
             this.numTimesThroughCorridor += 1;
         }
 
-        /*
+
         // See if this agent needs to be removed. Remove them by removing their
         // group (they are the only member of their group) from the constituent crowd.
-        if (this.getCurrentPositionVector().getX() > XLIM) {
+        /*if (this.getCurrentPositionVector().getX() > XLIM) {
             //System.out.println("Agent "+this.getId()+" needs to exit");
             Group groupToRemove = null;
             for (Group group : this.crowd.getGroups())
@@ -106,7 +112,7 @@ public class NewPedestrian extends Pedestrian {
                 System.err.println("ERROR");
             }
             this.crowd.getGroups().remove(groupToRemove);
-        }
-        */
+        }*/
+
     }
 }

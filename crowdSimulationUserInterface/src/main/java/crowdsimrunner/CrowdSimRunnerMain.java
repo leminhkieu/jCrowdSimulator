@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -37,14 +38,13 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
     // What the current status of the model is
     public enum STATUS {
-        INIT, // Initialising, need to continue to create agents every N seconds
         RUNNING, // The model is running, don't create any more agents
         FINISHING;
     }
-    public static STATUS status = STATUS.INIT; // Model starts in initialisation mode
+    public static STATUS status = STATUS.RUNNING; // Model starts in initialisation mode
 
-    private static final int NumAgents = 7; // Number of agents to create each spawn time
-    private static final int createInterval = 1; // Interval between creating agents (in seconds)
+    private static double agentCreateRate = 3.0; // Number of agents to create each spawn time
+    private static final int createInterval = 10 ; // Interval between creating agents (in seconds)
     private static final long runTime = 2000; // Run time, in seconds
     //private static final int numIntervals = 5000; // Number of times to spawn new agents
 
@@ -96,7 +96,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     "./results/r-aggregate-" + System.currentTimeMillis() + ".csv"));
             System.out.println("Opened aggregate file write: "+CrowdSimRunnerMain.aggregateWriter.toString());
 
-            CrowdSimRunnerMain.aggregateWriter.write("Time,MeanVelocity,MeanForce\n"); // An
+            CrowdSimRunnerMain.aggregateWriter.write("Time,MeanVelocity,MeanForce,CreateRate\n"); // An
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,8 +104,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         System.out.println("... simulation started");
 
 
-        // Create agents while in initialise mode (i.e. until the first agent has made it to the other side of the corridor
-        while (CrowdSimRunnerMain.status== STATUS.INIT) {
+        // Create agents at a partiular rate
+        while (CrowdSimRunnerMain.status== STATUS.RUNNING) {
         // Every 10 seconds, add more people, and do this 10 times
         //for (int i = 0; i<CrowdSimRunnerMain.numIntervals ; i++) {
         //    if (i % 100 == 0) {
@@ -121,27 +121,12 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             //System.out.println("Adding more people to the simulation");
             this.addPedestrians();
 
-            // See if any pedestrians have reached the end of the corridor (i.e. initialisation has finished)
-            if (NewPedestrian.reachedEndOfCorridor) {
-                CrowdSimRunnerMain.status = STATUS.RUNNING;
-                System.out.println("Status: "+CrowdSimRunnerMain.status);
-            }
-        }
-
-        // All agents have been added, now just keep running until the model should finish
-        while (CrowdSimRunnerMain.status== STATUS.RUNNING) {
-            try {
-                Thread.sleep(( 1000 ) / SPEED_UP_FACTOR); // Check every second
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if ( (this.crowdSimulator.getSimulatedTimeSpan()/100) > runTime) {
+            if ( (this.crowdSimulator.getSimulatedTimeSpan()/1000) > runTime) {
                 CrowdSimRunnerMain.status = STATUS.FINISHING;
                 System.out.println("Run time "+runTime+" reached; finished simulation");
                 System.out.println("Status: "+CrowdSimRunnerMain.status);
             }
             this.writeAggregate(); // Write the aggregate information
-
 
         }
 
@@ -198,8 +183,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     // Initialise the waypoints, these are used by all crowds.
                     // Make one waypoint near the beginning and another at the end of the corridor
                     List<Geometry> waypoints = new ArrayList<>();
-                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH/3), Math.round(HEIGHT/2))));
-                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH-1), Math.round(HEIGHT/2))));
+                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH/2), Math.round(HEIGHT/2))));
+                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH+1), Math.round(HEIGHT/2))));
                     CrowdSimRunnerMain.route = super.crowdSimulator.getRouteFactory().createRouteFromGeometries(waypoints);
 
 
@@ -283,13 +268,19 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         // create a list of Geometry objects to represent the people
         List<Geometry> people = new ArrayList<>();
         // Create people spread evenly vertically within the corridor
-        for (int i = 0; i < CrowdSimRunnerMain.NumAgents; i++) {
+        //CrowdSimRunnerMain.agentCreateRate*=1.0001;
+        //System.out.println(CrowdSimRunnerMain.agentCreateRate);
+        for (int i = 0; i < CrowdSimRunnerMain.agentCreateRate; i++) {
             // Complicated way to calculate agent position, scaling to within 1 m of the upper and lower boundaries
             // (from https://stackoverflow.com/questions/5294955/how-to-scale-down-a-range-of-numbers-with-a-known-min-and-max-value)
-            double pos = ((i+1)/(double)CrowdSimRunnerMain.NumAgents); // (called 'x' on the website above)
+            //double pos = ((i+1)/(double)CrowdSimRunnerMain.agentCreateRate); // (called 'x' on the website above)
+            //double pos = ((i+1)/(int)CrowdSimRunnerMain.agentCreateRate); // (called 'x' on the website above)
             double a = 1; // min value we want to scale to
             double b = HEIGHT-1; // max value we want to scale to
-            double y = ( ((b-a)*(pos-0)) / (1-0) ) + a;
+            //double y =  (b-a) * pos + a;
+            double y = (b-a) * Math.random() +a;
+            //double x = 5 * Math.random()+1;
+
             //System.out.println(y);
 
             people.add(geomFac.createPoint(new Coordinate(5.0, y )));
@@ -302,7 +293,13 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                 crowd = super.crowdSimulator.createVisualCrowd(people, false, Color.BLUE);
                 crowd.setRoute(CrowdSimRunnerMain.route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(), false);
                 // add crowd
-                super.crowdSimulator.addCrowd(crowd, false);
+
+                try {
+                    super.crowdSimulator.addCrowd(crowd, false);
+                }
+                catch (NullPointerException e) {
+                    System.err.println("NullPointerException, ignoring it.");
+                }
             } catch (CrowdSimulatorNotValidException | ConcurrentModificationException e) {
                 System.err.println("CrowdSimRunnerMain.addPedestrians caught an exception, continuing anyway");
                 System.err.println(e.getMessage());
@@ -324,17 +321,18 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     totalForce += p.getTotalForce().lengthSquared(); // Length squared avoids sqare root calculation
                 }
                 catch (NullPointerException e) {
-                    System.err.println("Unable to calcuate force fo this agent, ignoring it.");
+                    System.err.println("Unable to calculate force for this agent, ignoring it.");
                 }
                 numAgents++;
             } // for pedestrians
         } // for crowds
 
         try {
-            CrowdSimRunnerMain.aggregateWriter.write(String.format("%s,%.4f,%.4f\n",
+            CrowdSimRunnerMain.aggregateWriter.write(String.format("%s,%.4f,%.4f,%.4f\n",
                     this.crowdSimulator.getSimulatedTimeSpan(),
                     totalVelocity/(double)numAgents,
-                    totalForce/(double)numAgents
+                    totalForce/(double)numAgents,
+                    CrowdSimRunnerMain.agentCreateRate
             ));
             CrowdSimRunnerMain.aggregateWriter.flush();
         } catch (IOException e) {

@@ -2,6 +2,7 @@ package de.fhg.ivi.crowdsimulation.validate;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.slf4j.Logger;
@@ -123,31 +124,30 @@ public class ValidationTools
         if (crowdsToCheck == null || crowdsToCheck.isEmpty())
             return true;
         // Two loops over crowds to compare every crowd with every crowd
-        for (ICrowd crowd : crowdsToCheck)
-        {
-            for (Pedestrian pedestrian : crowd.getPedestrians())
-            {
-                for (ICrowd otherCrowd : crowdsToCheck)
-                {
-                    for (Pedestrian otherPedestrian : otherCrowd.getPedestrians())
-                    {
-                        // if the pedestrian is compared with itself coordinate are allowed to be
-                        // identical
-                        if (pedestrian.equals(otherPedestrian))
-                        {
-                            continue;
-                        }
-                        Vector2D pedestrianPosition = pedestrian.getCurrentPositionVector();
-                        Vector2D otherPedestrianPosition = otherPedestrian
-                            .getCurrentPositionVector();
-                        if (pedestrianPosition.equals(otherPedestrianPosition))
-                        {
-                            throw new CrowdSimulatorNotValidException(
-                                "At least 2 pedestrians are at the same initial positions, which is not allowed");
+
+        try {
+            for (ICrowd crowd : crowdsToCheck) {
+                for (Pedestrian pedestrian : crowd.getPedestrians()) {
+                    for (ICrowd otherCrowd : crowdsToCheck) {
+                        for (Pedestrian otherPedestrian : otherCrowd.getPedestrians()) {
+                            // if the pedestrian is compared with itself coordinate are allowed to be
+                            // identical
+                            if (pedestrian.equals(otherPedestrian)) {
+                                continue;
+                            }
+                            Vector2D pedestrianPosition = pedestrian.getCurrentPositionVector();
+                            Vector2D otherPedestrianPosition = otherPedestrian
+                                    .getCurrentPositionVector();
+                            if (pedestrianPosition.equals(otherPedestrianPosition)) {
+                                throw new CrowdSimulatorNotValidException(
+                                        "At least 2 pedestrians are at the same initial positions, which is not allowed");
+                            }
                         }
                     }
                 }
             }
+        } catch (NullPointerException | NoSuchElementException e) {
+            System.err.println("************Error, ignoring it*****************************.");
         }
         return true;
     }
