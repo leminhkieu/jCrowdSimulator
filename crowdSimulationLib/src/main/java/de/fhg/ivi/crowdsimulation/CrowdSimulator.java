@@ -232,7 +232,7 @@ public class CrowdSimulator<T extends ICrowd> implements Runnable
      * {@link Pedestrian}. This is the velocity that a pedestrian would choose for walking, when not
      * being delayed. The velocity is given in m/s. Cf. Helbing et al (2005) p. 11.
      */
-    public static final float         DEFAULT_MEAN_NORMAL_DESIRED_VELOCITY                   = 1.2f;
+    public static float         DEFAULT_MEAN_NORMAL_DESIRED_VELOCITY                   = 1.2f;
 
     /**
      * Default Standard deviation of {@link #DEFAULT_MEAN_NORMAL_DESIRED_VELOCITY}, i.e. the
@@ -241,7 +241,7 @@ public class CrowdSimulator<T extends ICrowd> implements Runnable
      * Outliers that would not be within the 95% of all values are avoided. The value is given in
      * m/s. Cf. Helbing et al (2005) p. 11.
      */
-    public static final float         DEFAULT_STANDARD_DEVIATION_OF_NORMAL_DESIRED_VELOCITY  = 0.3f;
+    public static float         DEFAULT_STANDARD_DEVIATION_OF_NORMAL_DESIRED_VELOCITY  = 0.3f;
 
     /**
      * Default average maximum velocity, i.e. the average maximum walking velocity of all

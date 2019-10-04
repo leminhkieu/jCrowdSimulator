@@ -18,8 +18,8 @@ public class NewPedestrian extends Pedestrian {
     // can stop creating agents
     public static boolean reachedEndOfCorridor = false;
 
-    private static final double XLIM = 95; // the point at which pedestrians leave the simulation
-    private static final int HEIGHT = 10;
+    private static final double XLIM = 110; // the point at which pedestrians leave the simulation
+    private static final int HEIGHT = 30;
     // (should be part of CrowdSimRUnnerMain but caused a circular dependency)
 
     public static BufferedWriter bw = null;
@@ -43,10 +43,12 @@ public class NewPedestrian extends Pedestrian {
         if (NewPedestrian.bw == null) {
             try {
                 NewPedestrian.bw = new BufferedWriter(new FileWriter(
-                        "./results/r-individual-"+System.currentTimeMillis()+".csv"));
+                        "./results/HPP-cone-6ped-withspeed-"+System.currentTimeMillis()+".csv"));
 
-                bw.write("Time,Agent,Xpos,Ypos,Velocity,Xforce,Yforce,NumTimesThroughCorridor\n"); // Any others
-            } catch (IOException e) {
+                //bw.write("Time,Agent,Xpos,RelativeDelay,Velocity,Xforce,MaximumDesiredVelocity\n"); // Any others
+                bw.write("Time,Agent,Xpos,Ypos,TotalForce,CurrentSpeed,MaxSpeed,NumThroughCorridor\n"); // Any others
+           } catch (IOException e) {
+                System.out.println("Error at NewPedestrian: "+this.getId());
                 e.printStackTrace();
                 System.exit(1);
             }
@@ -65,40 +67,50 @@ public class NewPedestrian extends Pedestrian {
     public void move(long time, double simulationInterval) {
         super.move(time,simulationInterval);
 
+
         // Add this pedestrian's data to the output file
         try {
+            //NewPedestrian.bw.write(String.format("%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%d\n",
             NewPedestrian.bw.write(String.format("%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%d\n",
                     this.crowdSimulator.getSimulatedTimeSpan(),
                     this.getId(),
                     this.getCurrentPositionVector().getX(),
                     this.getCurrentPositionVector().getY(),
-                    this.getCurrentVelocity(),
-                    this.getTotalForce().getX(),
-                    this.getTotalForce().getY(),
+                    //Math.abs(this.getTotalForce().getX()),
+                    //Math.abs(this.getTotalForce().getY()),
+                    Math.sqrt(Math.pow(this.getForceInteractionWithPedestrians().getX(),2)+Math.pow(this.getForceInteractionWithPedestrians().getY(),2)),
+                    //this.getForceInteractionWithPedestrians().getX(),
+                    Math.abs(this.getCurrentVelocity()),
+                    //this.getTotalForce().getX(),
+                    //this.getCurrentVelocity(),
+                    Math.abs(this.getCurrentNormalDesiredVelocity()),
                     this.numTimesThroughCorridor
                     ));
         } catch (IOException e) {
+            System.out.println("Error at Move: "+this.getId());
             e.printStackTrace();
             System.exit(1);
         }
 
         // See if the agent has reached the end of the corridor; if so then move them back to the beginning
+        /*
         if (this.getCurrentPositionVector().getX() > XLIM) {
             //this.setCurrentPositionVector(new Vector2D(0, this.getCurrentPositionCoordinate().y));
-            double a = 2; // min value we want to scale to
-            double b = HEIGHT-2; // max value we want to scale to
+            double a = 1; // min value we want to scale to
+            double b = HEIGHT-1; // max value we want to scale to
             //double y =  (b-a) * pos + a;
             double y = (b-a) * Math.random() +a;
-            //double x = 5 * Math.random()+1;
-            this.setCurrentPositionVector(new Vector2D(5.0, y));
+            double x = 10 * Math.random();
+            this.setCurrentPositionVector(new Vector2D(x, y));
             NewPedestrian.reachedEndOfCorridor = true;
             this.numTimesThroughCorridor += 1;
         }
+        */
 
 
         // See if this agent needs to be removed. Remove them by removing their
         // group (they are the only member of their group) from the constituent crowd.
-        /*if (this.getCurrentPositionVector().getX() > XLIM) {
+        if (this.getCurrentPositionVector().getX() > XLIM) {
             //System.out.println("Agent "+this.getId()+" needs to exit");
             Group groupToRemove = null;
             for (Group group : this.crowd.getGroups())
@@ -112,7 +124,7 @@ public class NewPedestrian extends Pedestrian {
                 System.err.println("ERROR");
             }
             this.crowd.getGroups().remove(groupToRemove);
-        }*/
+        }
 
     }
 }

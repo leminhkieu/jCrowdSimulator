@@ -3,6 +3,7 @@ package crowdsimrunner;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import de.fhg.ivi.crowdsimulation.CrowdSimulator;
 import de.fhg.ivi.crowdsimulation.CrowdSimulatorNotValidException;
 import de.fhg.ivi.crowdsimulation.crowd.Crowd;
 import de.fhg.ivi.crowdsimulation.crowd.NewPedestrian;
@@ -43,8 +44,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     }
     public static STATUS status = STATUS.RUNNING; // Model starts in initialisation mode
 
-    private static double agentCreateRate = 3.0; // Number of agents to create each spawn time
-    private static final int createInterval = 10 ; // Interval between creating agents (in seconds)
+    private static double agentCreateRate = 6; // Number of agents to create each spawn time
+    private static final int createInterval = 2 ; // Interval between creating agents (in seconds)
     private static final long runTime = 2000; // Run time, in seconds
     //private static final int numIntervals = 5000; // Number of times to spawn new agents
 
@@ -53,8 +54,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     // Write out aggregate info (like the the mean velocity) every second
     private static BufferedWriter aggregateWriter = null;
 
-    private static final int WIDTH = 100;
-    private static final int HEIGHT= 10;
+    private static final int WIDTH = 115;
+    private static final int HEIGHT= 30;
 
     private static Route route = null; // All agents will follw the same route
 
@@ -63,11 +64,11 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     enum DATA {
         BERLIN,
         DRESDEN,
-        CUSTOM // Used for a custom scenario (i.e. not reading input data)
+        OPENBOUNDARY // Used for a custom scenario (i.e. not reading input data)
     }
 
     //static DATA simData = DATA.DRESDEN;
-    static DATA simData = DATA.CUSTOM;
+    static DATA simData = DATA.OPENBOUNDARY;
 
     public CrowdSimRunnerMain() {
         super();
@@ -80,6 +81,9 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     public void fireActions() throws CrowdSimulatorNotValidException {
         /* ********* Add other controls here ********* */
 
+        CrowdSimulator.DEFAULT_MEAN_NORMAL_DESIRED_VELOCITY = 1.3f;
+        CrowdSimulator.DEFAULT_STANDARD_DEVIATION_OF_NORMAL_DESIRED_VELOCITY = 0.3f;
+
         // Start the simulation
         System.out.print("Starting the simulation ... ");
         System.out.println("Status: "+CrowdSimRunnerMain.status);
@@ -91,6 +95,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         this.crowdSimulator.setFastForwardFactor(SPEED_UP_FACTOR);
 
         // Open the results file for aggreagate results (i.e. not for individual agents)
+        /*
         try {
             CrowdSimRunnerMain.aggregateWriter = new BufferedWriter(new FileWriter(
                     "./results/r-aggregate-" + System.currentTimeMillis() + ".csv"));
@@ -101,10 +106,14 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             e.printStackTrace();
         }
 
+        */
+
         System.out.println("... simulation started");
 
 
         // Create agents at a partiular rate
+
+
         while (CrowdSimRunnerMain.status== STATUS.RUNNING) {
         // Every 10 seconds, add more people, and do this 10 times
         //for (int i = 0; i<CrowdSimRunnerMain.numIntervals ; i++) {
@@ -118,16 +127,19 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //System.out.println("Adding more people to the simulation");
-            this.addPedestrians();
+            if (CrowdSimRunnerMain.simData == CrowdSimRunnerMain.DATA.OPENBOUNDARY) {
 
-            if ( (this.crowdSimulator.getSimulatedTimeSpan()/1000) > runTime) {
-                CrowdSimRunnerMain.status = STATUS.FINISHING;
-                System.out.println("Run time "+runTime+" reached; finished simulation");
-                System.out.println("Status: "+CrowdSimRunnerMain.status);
+                    //System.out.println("Adding more people to the simulation");
+                this.addPedestrians();
+
+                if ( (this.crowdSimulator.getSimulatedTimeSpan()/1000) > runTime) {
+                    CrowdSimRunnerMain.status = STATUS.FINISHING;
+                    System.out.println("Run time "+runTime+" reached; finished simulation");
+                    System.out.println("Status: "+CrowdSimRunnerMain.status);
+                }
+                this.writeAggregate(); // Write the aggregate information
+
             }
-            this.writeAggregate(); // Write the aggregate information
-
         }
 
     } // fireActions
@@ -147,7 +159,9 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             CrowdSimRunnerMain csrm = new CrowdSimRunnerMain();
             try {
                 csrm.fireActions();
+                // Close the file and make it null so that if a new simulation starts it will reopen the writer
                 NewPedestrian.bw.close();
+                //NewPedestrian.bw = null;
             } catch (CrowdSimulatorNotValidException | IOException e) {
                 e.printStackTrace();
             }
@@ -162,20 +176,20 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     " using overridden method...");
             switch (CrowdSimRunnerMain.simData) {
                 case BERLIN:
-                    loadCrowdAndRoute(new File("src/main/resources/data/berlin/crowd1.shp"),
-                            new File("src/main/resources/data/berlin/waypoints1.shp"), Color.BLUE, false);
-                    loadCrowdAndRoute(new File("src/main/resources/data/berlin/crowd2.shp"),
-                            new File("src/main/resources/data/berlin/waypoints2.shp"), Color.RED, false);
-                    loadBoundaries(new File("src/main/resources/data/berlin/boundariesGK5.shp"), false);
+                    loadCrowdAndRoute(new File("crowdSimulationUserInterface/src/main/resources/data/berlin/crowd1.shp"),
+                            new File("crowdSimulationUserInterface/src/main/resources/data/berlin/waypoints1.shp"), Color.BLUE, false);
+                    loadCrowdAndRoute(new File("crowdSimulationUserInterface/src/main/resources/data/berlin/crowd2.shp"),
+                            new File("crowdSimulationUserInterface/src/main/resources/data/berlin/waypoints2.shp"), Color.RED, false);
+                    loadBoundaries(new File("crowdSimulationUserInterface/src/main/resources/data/berlin/boundariesGK5.shp"), false);
                     break;
                 case DRESDEN:
-                    loadCrowdAndRoute(new File("src/main/resources/data/dresden/crowd1.shp"),
-                            new File("src/main/resources/data/dresden/waypoints1.shp"), Color.BLUE, false);
-                    loadCrowdAndRoute(new File("src/main/resources/data/dresden/crowd2.shp"),
-                            new File("src/main/resources/data/dresden/waypoints2.shp"), Color.RED, false);
-                    loadBoundaries(new File("src/main/resources/data/dresden/boundaries.shp"), false);
+                    loadCrowdAndRoute(new File("crowdSimulationUserInterface/src/main/resources/data/dresden/crowd1.shp"),
+                            new File("crowdSimulationUserInterface/src/main/resources/data/dresden/waypoints1.shp"), Color.BLUE, false);
+                    loadCrowdAndRoute(new File("crowdSimulationUserInterface/src/main/resources/data/dresden/crowd2.shp"),
+                            new File("crowdSimulationUserInterface/src/main/resources/data/dresden/waypoints2.shp"), Color.RED, false);
+                    loadBoundaries(new File("crowdSimulationUserInterface/src/main/resources/data/dresden/boundaries.shp"), false);
                     break;
-                case CUSTOM:
+                case OPENBOUNDARY:
                     // Need a CRS
                     CoordinateReferenceSystem crs = CRS.parseWKT("PROJCS[\"OSGB 1936 / British National Grid\",GEOGCS[\"OSGB 1936\",DATUM[\"OSGB_1936\",SPHEROID[\"Airy 1830\",6377563.396,299.3249646,AUTHORITY[\"EPSG\",\"7001\"]],AUTHORITY[\"EPSG\",\"6277\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4277\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",49],PARAMETER[\"central_meridian\",-2],PARAMETER[\"scale_factor\",0.9996012717],PARAMETER[\"false_easting\",400000],PARAMETER[\"false_northing\",-100000],AUTHORITY[\"EPSG\",\"27700\"],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]");
                     super.crowdSimulator.setCrs(crs);
@@ -183,8 +197,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                     // Initialise the waypoints, these are used by all crowds.
                     // Make one waypoint near the beginning and another at the end of the corridor
                     List<Geometry> waypoints = new ArrayList<>();
-                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH/2), Math.round(HEIGHT/2))));
-                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH+1), Math.round(HEIGHT/2))));
+                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH-1), Math.round(17))));
+                    waypoints.add(geomFac.createPoint(new Coordinate(Math.round(WIDTH), Math.round(17))));
                     CrowdSimRunnerMain.route = super.crowdSimulator.getRouteFactory().createRouteFromGeometries(waypoints);
 
 
@@ -202,13 +216,18 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
                     // LOAD BOUNDARIES. One big corridor now
                     List<Geometry> boundaries = new ArrayList<>();
+                    // Bottom boundary
                     boundaries.add(geomFac.createLineString(new Coordinate[]{ // Line along the bottom
-                            new Coordinate(0, 0),
-                            new Coordinate(WIDTH, 0)
+                            new Coordinate(0, 0), // from
+                            //new Coordinate(WIDTH, 0) // to
+                            new Coordinate(WIDTH, 15) // to
                     }));
+
+                    // Top boundary
                     boundaries.add(geomFac.createLineString((new Coordinate[]{ // Line along the top
                             new Coordinate(0, HEIGHT),
-                            new Coordinate(WIDTH, HEIGHT)
+                            //new Coordinate(WIDTH, HEIGHT)
+                            new Coordinate(WIDTH,20)
                     })));
 
                     // A rectangle
@@ -279,11 +298,11 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             double b = HEIGHT-1; // max value we want to scale to
             //double y =  (b-a) * pos + a;
             double y = (b-a) * Math.random() +a;
-            //double x = 5 * Math.random()+1;
+            double x = 10 * Math.random();
 
             //System.out.println(y);
 
-            people.add(geomFac.createPoint(new Coordinate(5.0, y )));
+            people.add(geomFac.createPoint(new Coordinate(x, y )));
         }
 
         // create crowd object
@@ -311,6 +330,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
     private void writeAggregate() {
         // Write the mean information
+        /*
         double totalVelocity = 0.0;
         double totalForce = 0.0;
         int numAgents = 0;
@@ -339,6 +359,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             System.err.println("Error writing aggreate info: "+e.getMessage());
             e.printStackTrace();
         }
-
+    */
     }
+
 }
