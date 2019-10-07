@@ -307,21 +307,19 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
         // create crowd object
         VisualCrowd crowd = null;
-        while(crowd == null) { // Might need to try a couple of times to add agents if the new ones are in the same positon as existing ones
+        boolean success = false;
+        int counter = 0;
+        while(success==false) { // Might need to try a couple of times to add agents if the new ones are in the same positon as existing ones
+            counter++;
             try {
                 crowd = super.crowdSimulator.createVisualCrowd(people, false, Color.BLUE);
                 crowd.setRoute(CrowdSimRunnerMain.route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(), false);
                 // add crowd
-
-                try {
-                    super.crowdSimulator.addCrowd(crowd, false);
-                }
-                catch (NullPointerException e) {
-                    System.err.println("NullPointerException, ignoring it.");
-                }
-            } catch (CrowdSimulatorNotValidException | ConcurrentModificationException e) {
-                System.err.println("CrowdSimRunnerMain.addPedestrians caught an exception, continuing anyway");
-                System.err.println(e.getMessage());
+                super.crowdSimulator.addCrowd(crowd, false);
+                success = true;
+            } catch (CrowdSimulatorNotValidException | ConcurrentModificationException | NullPointerException e) {
+                System.err.println("CrowdSimRunnerMain.addPedestrians caught an exception, will attempt to add crowd again (try no."+counter+").");
+                System.err.println("Message: "+e.getMessage());
                 e.printStackTrace();
             }
         }
