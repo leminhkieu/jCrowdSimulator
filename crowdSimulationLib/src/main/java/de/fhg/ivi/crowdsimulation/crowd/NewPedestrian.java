@@ -47,8 +47,14 @@ public class NewPedestrian extends Pedestrian {
 
                 //bw.write("Time,Agent,Xpos,RelativeDelay,Velocity,Xforce,MaximumDesiredVelocity\n"); // Any others
                 bw.write("Time,Agent,Xpos,Ypos,TotalForce,CurrentSpeed,MaxSpeed,NumThroughCorridor\n"); // Any others
-           } catch (IOException e) {
-                System.out.println("Error at NewPedestrian: "+this.getId());
+            }
+            catch (java.io.FileNotFoundException e) {
+                System.err.println("FileNoteFoundException in NewPedestrian. Have you created a 'results' directory?");
+                e.printStackTrace();
+                System.exit(1);
+            }
+            catch (IOException e) {
+                System.err.println("Error at NewPedestrian: "+this.getId());
                 e.printStackTrace();
                 System.exit(1);
             }
@@ -121,7 +127,7 @@ public class NewPedestrian extends Pedestrian {
                 }
             }
             if (groupToRemove==null) {
-                System.err.println("ERROR");
+                System.err.println("Error in NewPedestrian.move(): groupToRemove is null so can't remove agent for some reason.S");
             }
             this.crowd.getGroups().remove(groupToRemove);
         }
