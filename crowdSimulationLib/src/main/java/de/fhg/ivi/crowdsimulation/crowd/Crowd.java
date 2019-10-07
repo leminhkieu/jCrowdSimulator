@@ -77,7 +77,7 @@ public class Crowd implements ICrowd, Identifiable
      * {@link List} object, which contains all {@link Group}s within this {@link Crowd}, each
      * {@link Group} containing 1 to n {@link Pedestrian}s
      */
-    private List<Group>         groups;
+    private volatile List<Group>         groups;
 
     /**
      * {@link Route} object, which contains all {@link WayPoint}

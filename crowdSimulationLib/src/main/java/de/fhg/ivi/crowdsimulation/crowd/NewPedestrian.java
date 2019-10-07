@@ -14,6 +14,9 @@ import java.io.IOException;
 
 public class NewPedestrian extends Pedestrian {
 
+    // A unique ID for each pedestrian
+    private static int UniqueID = 0;
+
     // We need to when the first agent reaches the end of the corridor so that CrowdSimRunnerMain
     // can stop creating agents
     public static boolean reachedEndOfCorridor = false;
@@ -34,7 +37,7 @@ public class NewPedestrian extends Pedestrian {
                          float maximumDesiredVelocity, ForceModel forceModel, NumericIntegrator numericIntegrator, Quadtree quadtree,
                          CrowdSimulator crowdSimulator, Crowd crowd)
     {
-        super(0, initialPositionX, initialPositionY, normalDesiredVelocity, maximumDesiredVelocity,
+        super(NewPedestrian.UniqueID++, initialPositionX, initialPositionY, normalDesiredVelocity, maximumDesiredVelocity,
                 forceModel, numericIntegrator, quadtree);
         this.crowdSimulator = crowdSimulator;
         this.crowd = crowd;
