@@ -223,6 +223,12 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                             new Coordinate(WIDTH, 15) // to
                     }));
 
+                    // Left boundary
+                    boundaries.add(geomFac.createLineString(new Coordinate[]{ // Line along the bottom
+                            new Coordinate(0, 0), // from
+                            new Coordinate(0, HEIGHT) // to
+                    }));
+
                     // Top boundary
                     boundaries.add(geomFac.createLineString((new Coordinate[]{ // Line along the top
                             new Coordinate(0, HEIGHT),
@@ -294,8 +300,8 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             // (from https://stackoverflow.com/questions/5294955/how-to-scale-down-a-range-of-numbers-with-a-known-min-and-max-value)
             //double pos = ((i+1)/(double)CrowdSimRunnerMain.agentCreateRate); // (called 'x' on the website above)
             //double pos = ((i+1)/(int)CrowdSimRunnerMain.agentCreateRate); // (called 'x' on the website above)
-            double a = 1; // min value we want to scale to
-            double b = HEIGHT-1; // max value we want to scale to
+            double a = 2; // min value we want to scale to
+            double b = HEIGHT-2; // max value we want to scale to
             //double y =  (b-a) * pos + a;
             double y = (b-a) * Math.random() +a;
             double x = 10 * Math.random();
@@ -311,6 +317,10 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         int counter = 0;
         while(success==false) { // Might need to try a couple of times to add agents if the new ones are in the same positon as existing ones
             counter++;
+            if (counter>5) {
+                System.err.println("Have tried too many times to add a new agent without success, exitting.");
+                System.exit(1);
+            }
             try {
                 crowd = super.crowdSimulator.createVisualCrowd(people, false, Color.BLUE);
                 crowd.setRoute(CrowdSimRunnerMain.route, super.crowdSimulator.getFastForwardClock().currentTimeMillis(), false);
