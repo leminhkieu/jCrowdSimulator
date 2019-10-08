@@ -147,7 +147,9 @@ public class ValidationTools
                 }
             }
         } catch (NullPointerException | NoSuchElementException e) {
-            System.err.println("************Error, ignoring it*****************************.");
+            System.err.println("ValidationTools: Error checking for distinct pedestrian positions. Message: "+e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
         }
         return true;
     }
