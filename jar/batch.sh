@@ -7,6 +7,6 @@
 for i in {1..10}
 do
  printf " \n\n ********************* \n\n  *** EXPERIMENT $i *** \n\n ********************* \n\n"
- java -jar crowdsimui1.jar 
+ java -jar jCrowdSimulator.jar 
 done 
 
