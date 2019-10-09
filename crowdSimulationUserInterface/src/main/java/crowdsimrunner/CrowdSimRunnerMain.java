@@ -21,10 +21,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -328,9 +325,17 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                 super.crowdSimulator.addCrowd(crowd, false);
                 success = true;
             } catch (CrowdSimulatorNotValidException | ConcurrentModificationException | NullPointerException e) {
-                System.err.println("CrowdSimRunnerMain.addPedestrians caught an exception, will attempt to add crowd again (try no."+counter+").");
-                System.err.println("Message: "+e.getMessage());
-                e.printStackTrace();
+                // First get the stack trace as a string so that everything can be printed at once
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                System.err.println("********************************************\n"+
+                        "CrowdSimRunnerMain.addPedestrians caught an exception, will attempt to add crowd again (try no."+counter+").\n"+
+                        "Message: "+e.getMessage()+"\n"+
+                sw.toString()
+                );
+                //e.printStackTrace();
+                System.err.println("********************************************");
             }
         }
         return crowd;
