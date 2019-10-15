@@ -4,9 +4,10 @@
 # This is done in a batch script, rather than through a Java class, because each time a new
 # simulation starts it needs a fresh jvm, otherwise there are variables left over from the
 # previous simulatino run that will break future runs.
-for i in {1..10}
+for i in {1..5}
 do
  printf " \n\n ********************* \n\n  *** EXPERIMENT $i *** \n\n ********************* \n\n"
- java -jar jCrowdSimulator.jar 
+ #java -jar jCrowdSimulator-minh.jar > out$i.txt &
+ java -jar jCrowdSimulator-minh.jar
 done 
 

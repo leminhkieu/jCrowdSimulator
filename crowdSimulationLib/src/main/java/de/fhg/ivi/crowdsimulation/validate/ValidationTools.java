@@ -1,6 +1,7 @@
 package de.fhg.ivi.crowdsimulation.validate;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -146,7 +147,7 @@ public class ValidationTools
                     }
                 }
             }
-        } catch (NullPointerException | NoSuchElementException e) {
+        } catch ( NoSuchElementException e) {
             System.err.println("ValidationTools: Error checking for distinct pedestrian positions. Message: "+e.getMessage());
             e.printStackTrace();
             System.exit(1);
@@ -175,6 +176,7 @@ public class ValidationTools
             for (Pedestrian pedestrian : crowd.getPedestrians())
             {
                 int numberOfPedestriansWithSameId = 0;
+                List<Pedestrian> pedestriansWithSameID = new ArrayList<>(); // So we can report
                 for (ICrowd otherCrowd : crowdsToCheck)
                 {
                     for (Pedestrian otherPedestrian : otherCrowd.getPedestrians())
@@ -185,8 +187,13 @@ public class ValidationTools
                 }
                 if (numberOfPedestriansWithSameId > 1)
                 {
-                    throw new CrowdSimulatorNotValidException(
-                        "There are at least 2 pedestrians that have the same id. ids of pedestrians have to be unique.");
+                    String error = "There are at least 2 pedestrians that have the same id. ids of pedestrians have to be unique." +
+                                "The pedestrians are:\n";
+                    for (Pedestrian p: pedestriansWithSameID) {
+                        error += "\t"+p.toString()+"\n";
+                    }
+
+                    throw new CrowdSimulatorNotValidException(error);
                 }
             }
         }

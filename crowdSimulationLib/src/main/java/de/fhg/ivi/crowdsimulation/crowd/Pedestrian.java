@@ -790,4 +790,13 @@ public class Pedestrian implements Clusterable, Cloneable, QuadtreeAccess, Ident
         }
 
     }
+
+
+    /**
+     * Report the Pedestrian's ID and position vector.
+     * @return
+     */
+    public String toString(){
+        return "Pedestrian "+this.getId()+" - "+this.getCurrentPositionVector();
+    }
 }
