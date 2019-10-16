@@ -43,7 +43,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
 
     private static double agentCreateRate = 6; // Number of agents to create each spawn time   - 2, 4, 6
     private static final int createInterval = 2 ; // Interval between creating agents (in seconds)
-    private static final long runTime = 2000; // Run time, in seconds
+    private static final long runTime = 1200; // Run time, in seconds
     //private static final int numIntervals = 5000; // Number of times to spawn new agents
 
     private static final int SPEED_UP_FACTOR = 10; // Speed up by x times (if 1 then run in real time)
