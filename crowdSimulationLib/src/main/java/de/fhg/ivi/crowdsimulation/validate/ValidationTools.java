@@ -183,14 +183,16 @@ public class ValidationTools
                     {
                         if (pedestrian.getId() == otherPedestrian.getId())
                             numberOfPedestriansWithSameId++ ;
+                            pedestriansWithSameID.add(pedestrian);
+                            pedestriansWithSameID.add(otherPedestrian);
                     }
                 }
                 if (numberOfPedestriansWithSameId > 1)
                 {
                     String error = "There are at least 2 pedestrians that have the same id. ids of pedestrians have to be unique." +
-                                "The pedestrians are:\n";
+                                "The pedestrians are:";
                     for (Pedestrian p: pedestriansWithSameID) {
-                        error += "\t"+p.toString()+"\n";
+                        error += "\n\t"+p.toString();
                     }
 
                     throw new CrowdSimulatorNotValidException(error);

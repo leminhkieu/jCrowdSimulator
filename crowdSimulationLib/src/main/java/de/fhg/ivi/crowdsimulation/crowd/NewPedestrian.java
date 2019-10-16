@@ -10,12 +10,17 @@ import de.fhg.ivi.crowdsimulation.geom.Quadtree;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class NewPedestrian extends Pedestrian {
 
     // A unique ID for each pedestrian
     private static int UniqueID = 0;
+
+    // A lock that makes sure agents aren't added and removed at the same time
+    public static final Lock agentLock = new ReentrantLock();
 
     // We need to when the first agent reaches the end of the corridor so that CrowdSimRunnerMain
     // can stop creating agents
@@ -37,7 +42,7 @@ public class NewPedestrian extends Pedestrian {
                          float maximumDesiredVelocity, ForceModel forceModel, NumericIntegrator numericIntegrator, Quadtree quadtree,
                          CrowdSimulator crowdSimulator, Crowd crowd)
     {
-        super(NewPedestrian.UniqueID++, initialPositionX, initialPositionY, normalDesiredVelocity, maximumDesiredVelocity,
+        super(NewPedestrian.getUniqueID(), initialPositionX, initialPositionY, normalDesiredVelocity, maximumDesiredVelocity,
                 forceModel, numericIntegrator, quadtree);
         this.crowdSimulator = crowdSimulator;
         this.crowd = crowd;
@@ -121,6 +126,7 @@ public class NewPedestrian extends Pedestrian {
         // group (they are the only member of their group) from the constituent crowd.
         if (this.getCurrentPositionVector().getX() > XLIM) {
             //System.out.println("Agent "+this.getId()+" needs to exit");
+            agentLock.lock(); // Prevents other threads removing or adding agents at the same time
             Group groupToRemove = null;
             for (Group group : this.crowd.getGroups())
             {
@@ -133,7 +139,12 @@ public class NewPedestrian extends Pedestrian {
                 System.err.println("Error in NewPedestrian.move(): groupToRemove is null so can't remove agent for some reason.S");
             }
             this.crowd.getGroups().remove(groupToRemove);
+            agentLock.unlock();
         }
 
+    }
+
+    private static synchronized int getUniqueID() {
+        return NewPedestrian.UniqueID++;
     }
 }

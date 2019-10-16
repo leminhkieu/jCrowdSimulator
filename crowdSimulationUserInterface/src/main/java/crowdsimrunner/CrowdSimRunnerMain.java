@@ -309,6 +309,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
         }
 
         // create crowd object
+        NewPedestrian.agentLock.lock(); // Make sure no agents are removed at the same time
         VisualCrowd crowd = null;
         boolean success = false;
         int counter = 0;
@@ -338,6 +339,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
                 System.err.println("********************************************");
             }
         }
+        NewPedestrian.agentLock.unlock();
         return crowd;
     }
 
