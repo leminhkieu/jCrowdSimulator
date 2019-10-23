@@ -51,7 +51,9 @@ public class NewPedestrian extends Pedestrian {
         if (NewPedestrian.bw == null) {
             try {
                 NewPedestrian.bw = new BufferedWriter(new FileWriter(
-                        "./results/HPP-cone-2ped-withspeed-"+System.currentTimeMillis()+".csv"));
+                        "./results/HPP-cone-8ped-withspeed-"+System.currentTimeMillis()+".csv"));
+                //NewPedestrian.bw = new BufferedWriter(new FileWriter(
+                //        "./results/HPP-cone-8ped-validate.csv"));
 
                 //bw.write("Time,Agent,Xpos,RelativeDelay,Velocity,Xforce,MaximumDesiredVelocity\n"); // Any others
                 bw.write("Time,Agent,Xpos,Ypos,TotalForce,CurrentSpeed,MaxSpeed,NumThroughCorridor\n"); // Any others

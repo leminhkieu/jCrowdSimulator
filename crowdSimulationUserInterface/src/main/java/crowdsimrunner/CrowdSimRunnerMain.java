@@ -41,7 +41,7 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     }
     public static STATUS status = STATUS.RUNNING; // Model starts in initialisation mode
 
-    private static double agentCreateRate = 2; // Number of agents to create each spawn time   - 2, 4, 6
+    private static double agentCreateRate = 8; // Number of agents to create each spawn time   - 2, 4, 6
     private static final int createInterval = 2 ; // Interval between creating agents (in seconds)
     private static final long runTime = 1200; // Run time, in seconds
     //private static final int numIntervals = 5000; // Number of times to spawn new agents
