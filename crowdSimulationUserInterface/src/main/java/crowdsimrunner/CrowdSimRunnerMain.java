@@ -41,12 +41,12 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
     }
     public static STATUS status = STATUS.RUNNING; // Model starts in initialisation mode
 
-    private static double agentCreateRate = 8; // Number of agents to create each spawn time   - 2, 4, 6
-    private static final int createInterval = 2 ; // Interval between creating agents (in seconds)
-    private static final long runTime = 1200; // Run time, in seconds
+    private static double agentCreateRate = 3; // Number of agents to create each spawn time   - 2, 4, 6
+    private static final int createInterval = 1 ; // Interval between creating agents (in seconds)
+    private static final long runTime = 300; // Run time, in seconds
     //private static final int numIntervals = 5000; // Number of times to spawn new agents
 
-    private static final int SPEED_UP_FACTOR = 10; // Speed up by x times (if 1 then run in real time)
+    private static final int SPEED_UP_FACTOR = 1; // Speed up by x times (if 1 then run in real time)
 
     // Write out aggregate info (like the the mean velocity) every second
     private static BufferedWriter aggregateWriter = null;
@@ -299,9 +299,10 @@ public class CrowdSimRunnerMain extends CrowdSimulation {
             //double pos = ((i+1)/(int)CrowdSimRunnerMain.agentCreateRate); // (called 'x' on the website above)
             double a = 2; // min value we want to scale to
             double b = HEIGHT-2; // max value we want to scale to
-            //double y =  (b-a) * pos + a;
+            //double y =  b;
             double y = (b-a) * Math.random() +a;
-            double x = 10 * Math.random();
+            //double x = 10 * Math.random();
+            double x = 10;
 
             //System.out.println(y);
 
